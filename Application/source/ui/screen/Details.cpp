@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "Application.hpp"
 #include "ui/screen/Details.hpp"
 #include "utils/Lang.hpp"

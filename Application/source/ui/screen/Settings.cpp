@@ -1,5 +1,7 @@
 #include "Application.hpp"
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include "utils/Forwarder.hpp"
 #include "utils/Lang.hpp"
 #include "ui/screen/Settings.hpp"
@@ -61,7 +63,7 @@ namespace Screen {
                 Aether::TextBlock * tb = new Aether::TextBlock(50, 40, "settings.other.replaceBox.error"_lang, 24, bw - 100);
                 tb->setColour(this->app->theme()->text());
                 body->addElement(tb);
-                tb = new Aether::TextBlock(50, tb->y() + tb->h() + 20, "settings.other.replaceBox.errorMsg1"_lang + "\n/switch/NX-Activity-Log/NX-Activity-Log.nro\n\n" + "settings.other.replaceBox.errorMsg2"_lang + "\n" + "settings.other.replaceBox.errorMsg3"_lang, 20, body->w() - 100);
+                tb = new Aether::TextBlock(50, tb->y() + tb->h() + 20, "settings.other.replaceBox.errorMsg1"_lang + "\n/switch/PlayLog-Switch/PlayLog-Switch.nro\n\n" + "settings.other.replaceBox.errorMsg2"_lang + "\n" + "settings.other.replaceBox.errorMsg3"_lang, 20, body->w() - 100);
                 tb->setColour(this->app->theme()->mutedText());
                 body->addElement(tb);
                 this->msgbox->setBodySize(bw, tb->y() + tb->h() + 40);
@@ -238,6 +240,10 @@ namespace Screen {
         this->app->addOverlay(this->progressbox);
     }
 
+    void Settings::showPlayLogResultOverlay() {
+        this->setupGenericMessageOverlay(this->jobResult);
+    }
+
     void Settings::showDeleteImportedOverlay() {
         // Create msgbox
         this->prepareMessageBox();
@@ -246,7 +252,7 @@ namespace Screen {
         });
         this->msgbox->addRightButton("common.delete"_lang, [this](){
             // Delete file
-            std::filesystem::remove("/switch/NX-Activity-Log/importedData.json");
+            std::filesystem::remove("/switch/PlayLog-Switch/importedData.json");
 
             // Disable button
             this->optionDeleteImport->setTextColour(this->app->theme()->mutedLine());
@@ -286,12 +292,30 @@ namespace Screen {
 
             } else if (this->job == Job::Import) {
                 // Update delete button status
-                bool hasData = std::filesystem::exists("/switch/NX-Activity-Log/importedData.json");
+                bool hasData = std::filesystem::exists("/switch/PlayLog-Switch/importedData.json");
                 this->optionDeleteImport->setTextColour(hasData ? this->app->theme()->text() : this->app->theme()->mutedLine());
                 this->optionDeleteImport->setSelectable(hasData);
                 this->optionDeleteImport->setTouchable(hasData);
 
                 this->setupGenericMessageOverlay("settings.importExport.importSuccessful"_lang);
+
+            } else if (this->job == Job::Send) {
+                this->optionSend->setSelectable(true);
+                this->optionSend->setTouchable(true);
+                this->optionSend->setTextColour(this->app->theme()->text());
+                this->optionConnectionTest->setSelectable(true);
+                this->optionConnectionTest->setTouchable(true);
+                this->optionConnectionTest->setTextColour(this->app->theme()->text());
+                this->showPlayLogResultOverlay();
+
+            } else if (this->job == Job::ConnectionTest) {
+                this->optionSend->setSelectable(true);
+                this->optionSend->setTouchable(true);
+                this->optionSend->setTextColour(this->app->theme()->text());
+                this->optionConnectionTest->setSelectable(true);
+                this->optionConnectionTest->setTouchable(true);
+                this->optionConnectionTest->setTextColour(this->app->theme()->text());
+                this->showPlayLogResultOverlay();
             }
 
             this->job = Job::None;
@@ -500,7 +524,7 @@ namespace Screen {
 
         // IMPORT
         lb = new Aether::ListButton("settings.importExport.import"_lang, [this]() {
-            if (!std::filesystem::exists("/switch/NX-Activity-Log/import.json")) {
+            if (!std::filesystem::exists("/switch/PlayLog-Switch/import.json")) {
                 this->setupGenericMessageOverlay("settings.importExport.noImportFile"_lang);
                 return;
             }
@@ -516,8 +540,67 @@ namespace Screen {
         lc->setTextColour(this->app->theme()->mutedText());
         this->list->addElement(lc);
 
+        this->list->addElement(new Aether::ListSeparator());
+        lh = new Aether::ListHeading("PlayLog (envio manual)");
+        lh->setRectColour(this->app->theme()->mutedLine());
+        lh->setTextColour(this->app->theme()->text());
+        this->list->addElement(lh);
+        this->list->addElement(new Aether::ListSeparator(20));
+
+        lc = new Aether::ListComment("Destino: " + this->app->config()->playlogUrl() + "\nO histórico só é enviado quando você seleciona o botão abaixo.");
+        lc->setTextColour(this->app->theme()->mutedText());
+        this->list->addElement(lc);
+
+        this->optionConnectionTest = new Aether::ListButton("Checar conexão com PlayLog", [this]() {
+            this->optionSend->setSelectable(false);
+            this->optionSend->setTouchable(false);
+            this->optionSend->setTextColour(this->app->theme()->mutedText());
+            this->optionConnectionTest->setSelectable(false);
+            this->optionConnectionTest->setTouchable(false);
+            this->optionConnectionTest->setTextColour(this->app->theme()->mutedText());
+            this->jobResult.clear();
+            this->progressValue = 0;
+            this->progressbox->setHeading("Testando conexão com PlayLog");
+            this->progressbox->setValue(0);
+            this->progressbox->reuse();
+            this->app->addOverlay(this->progressbox);
+            this->app->checkPlayLogConnection(this->progressValue, this->jobResult);
+            this->job = Job::ConnectionTest;
+        });
+        this->optionConnectionTest->setLineColour(this->app->theme()->mutedLine());
+        this->optionConnectionTest->setTextColour(this->app->theme()->text());
+        this->list->addElement(this->optionConnectionTest);
+
+        lc = new Aether::ListComment("Verifica a API e salva o diagnóstico em /switch/PlayLog-Switch/playlog-connection-debug.json.");
+        lc->setTextColour(this->app->theme()->mutedText());
+        this->list->addElement(lc);
+
+        this->optionSend = new Aether::ListButton("Enviar sessões concluídas ao PlayLog", [this]() {
+            this->optionConnectionTest->setSelectable(false);
+            this->optionConnectionTest->setTouchable(false);
+            this->optionConnectionTest->setTextColour(this->app->theme()->mutedText());
+            this->optionSend->setSelectable(false);
+            this->optionSend->setTouchable(false);
+            this->optionSend->setTextColour(this->app->theme()->mutedText());
+            this->jobResult.clear();
+            this->progressValue = 0;
+            this->progressbox->setHeading("Enviando sessões ao PlayLog");
+            this->progressbox->setValue(0);
+            this->progressbox->reuse();
+            this->app->addOverlay(this->progressbox);
+            this->app->sendToPlayLog(this->progressValue, this->jobResult);
+            this->job = Job::Send;
+        });
+        this->optionSend->setLineColour(this->app->theme()->mutedLine());
+        this->optionSend->setTextColour(this->app->theme()->text());
+        this->list->addElement(this->optionSend);
+
+        lc = new Aether::ListComment("Envia uma sessão por requisição. O payload exato e as respostas ficam salvos em /switch/PlayLog-Switch/playlog-send-debug.json. URL configurável em /config/PlayLog-Switch/config.ini, seção [playlog], opção base_url.");
+        lc->setTextColour(this->app->theme()->mutedText());
+        this->list->addElement(lc);
+
         // DELETE IMPORTED DATA
-        bool hasData = std::filesystem::exists("/switch/NX-Activity-Log/importedData.json");
+        bool hasData = std::filesystem::exists("/switch/PlayLog-Switch/importedData.json");
         this->optionDeleteImport = new Aether::ListButton("settings.importExport.deleteImport"_lang, [this]() {
             this->showDeleteImportedOverlay();
         });
@@ -587,7 +670,7 @@ namespace Screen {
         lc = new Aether::ListComment("settings.translations"_lang + "\nChinese: tiansongyu\nFrench: xRock\nGerman: Ayk\nItalian: reinzanini\nKorean: jhs516\nPortugese: evertonstz\nRussian: Sookie69\nSpanish: ivanmarban\nTurkish: fpscan");
         lc->setTextColour(this->app->theme()->mutedText());
         this->list->addElement(lc);
-        lc = new Aether::ListComment("NX Activity Log v" + std::string(VER_STRING) + "\n" + "settings.about"_lang + "\n\n" + "settings.support"_lang + "\nhttps://ko-fi.com/tallbl0nde");
+        lc = new Aether::ListComment("PlayLog Switch v" + std::string(VER_STRING) + "\n" + "settings.about"_lang + "\n\n" + "settings.support"_lang + "\nhttps://playlog.domlu.house");
         lc->setTextColour(this->app->theme()->mutedText());
         this->list->addElement(lc);
 

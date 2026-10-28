@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "Application.hpp"
 #include "utils/Lang.hpp"
 #include "ui/element/ListAdjust.hpp"

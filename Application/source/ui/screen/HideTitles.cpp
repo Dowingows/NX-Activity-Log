@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <algorithm>
 #include "Application.hpp"
 #include "utils/Lang.hpp"
 #include "ui/element/ListHide.hpp"

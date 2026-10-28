@@ -114,7 +114,7 @@ namespace Main {
         }
 
         // Write to file
-        std::ofstream file("/switch/NX-Activity-Log/export.json");
+        std::ofstream file("/switch/PlayLog-Switch/export.json");
         file << json.dump(4) << std::endl;
 
         // Pause so those with little data can still see the process completed successfully

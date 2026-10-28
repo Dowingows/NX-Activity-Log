@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "utils/Lang.hpp"
 #include "ui/element/SortedList.hpp"
 #include "utils/Utils.hpp"

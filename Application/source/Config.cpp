@@ -15,13 +15,13 @@ namespace Main {
 
     void Config::readConfig() {
         // Check if file exists, and if not create directories
-        if (!std::filesystem::exists("/config/NX-Activity-Log/config.ini")) {
+        if (!std::filesystem::exists("/config/PlayLog-Switch/config.ini")) {
             std::filesystem::create_directory("/config");
-            std::filesystem::create_directory("/config/NX-Activity-Log");
+            std::filesystem::create_directory("/config/PlayLog-Switch");
         }
 
         // Read (or create) file
-        this->ini = simpleIniParser::Ini::parseOrCreateFile("/config/NX-Activity-Log/config.ini");
+        this->ini = simpleIniParser::Ini::parseOrCreateFile("/config/PlayLog-Switch/config.ini");
         simpleIniParser::IniSection * sec = ini->findOrCreateSection("general");
         simpleIniParser::IniOption * option = sec->findOrCreateFirstOption("language", "Default");
         if (option->value == "English") {
@@ -116,25 +116,29 @@ namespace Main {
             this->tImage_ = false;
         }
 
+        sec = ini->findOrCreateSection("playlog");
+        option = sec->findOrCreateFirstOption("base_url", "https://playlog.domlu.house");
+        this->playlogUrl_ = option->value;
+
         // Read in hidden titles
-        if (!std::filesystem::exists("/config/NX-Activity-Log/hidden.conf")) {
-            std::ofstream file("/config/NX-Activity-Log/hidden.conf");
+        if (!std::filesystem::exists("/config/PlayLog-Switch/hidden.conf")) {
+            std::ofstream file("/config/PlayLog-Switch/hidden.conf");
             file.close();
         }
 
-        std::ifstream file("/config/NX-Activity-Log/hidden.conf");
+        std::ifstream file("/config/PlayLog-Switch/hidden.conf");
         std::string line;
         while (file >> line) {
             this->hidden.push_back(Utils::stringToU64(line));
         }
 
         // Read in adjustment values
-        if (!std::filesystem::exists("/config/NX-Activity-Log/adjustments.conf")) {
-            std::ofstream file("/config/NX-Activity-Log/adjustments.conf");
+        if (!std::filesystem::exists("/config/PlayLog-Switch/adjustments.conf")) {
+            std::ofstream file("/config/PlayLog-Switch/adjustments.conf");
             file.close();
         }
 
-        std::ifstream file2("/config/NX-Activity-Log/adjustments.conf");
+        std::ifstream file2("/config/PlayLog-Switch/adjustments.conf");
         std::string token;
         while (file2 >> line) {
             // Break apart line
@@ -253,7 +257,10 @@ namespace Main {
             option->value = "false";
         }
 
-        ini->writeToFile("/config/NX-Activity-Log/config.ini");
+        option = ini->findSection("playlog")->findFirstOption("base_url");
+        option->value = this->playlogUrl_;
+
+        ini->writeToFile("/config/PlayLog-Switch/config.ini");
     }
 
     std::vector<AdjustmentValue> Config::adjustmentValues() {
@@ -296,10 +303,14 @@ namespace Main {
         return this->tImage_;
     }
 
+    std::string Config::playlogUrl() {
+        return this->playlogUrl_;
+    }
+
     bool Config::setAdjustmentValues(const std::vector<AdjustmentValue> & values) {
         this->adjustments = values;
 
-        std::ofstream file("/config/NX-Activity-Log/adjustments.conf");
+        std::ofstream file("/config/PlayLog-Switch/adjustments.conf");
         for (AdjustmentValue value : values) {
             file << Utils::formatHexString(value.titleID) << ":";
             file << Utils::formatHexString(value.userID.uid[0]) << Utils::formatHexString(value.userID.uid[1]) << ":";
@@ -312,7 +323,7 @@ namespace Main {
     bool Config::setHiddenTitles(const std::vector<uint64_t> & titles) {
         this->hidden = titles;
 
-        std::ofstream file("/config/NX-Activity-Log/hidden.conf");
+        std::ofstream file("/config/PlayLog-Switch/hidden.conf");
         for (uint64_t titleID : this->hidden) {
             file << Utils::formatHexString(titleID) << std::endl;
         }
@@ -357,6 +368,11 @@ namespace Main {
 
     void Config::setTImage(bool b) {
         this->tImage_ = b;
+        this->writeConfig();
+    }
+
+    void Config::setPlaylogUrl(const std::string & url) {
+        this->playlogUrl_ = url;
         this->writeConfig();
     }
 };

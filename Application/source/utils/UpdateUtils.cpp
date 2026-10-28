@@ -6,15 +6,15 @@
 #include "utils/Time.hpp"
 
 // Flag indicating an update is available
-#define AVAILABLE_FILE "/config/NX-Activity-Log/update.flag"
+#define AVAILABLE_FILE "/config/PlayLog-Switch/update.flag"
 // URL to query release data
 #define GITHUB_API_URL "https://api.github.com/repos/tallbl0nde/NX-Activity-Log/releases/latest"
 // File storing timestamp of last check
-#define TIMESTAMP_FILE "/config/NX-Activity-Log/update.time"
+#define TIMESTAMP_FILE "/config/PlayLog-Switch/update.time"
 // Path of downloaded .nro
-#define TMP_DONE_PATH "/switch/NX-Activity-Log/update.nro"
+#define TMP_DONE_PATH "/switch/PlayLog-Switch/update.nro"
 // Path of downloading .nro (not finished)
-#define TMP_PATH "/switch/NX-Activity-Log/tmp.nro"
+#define TMP_PATH "/switch/PlayLog-Switch/tmp.nro"
 
 namespace Utils::Update {
     bool available() {
@@ -61,9 +61,9 @@ namespace Utils::Update {
 
     bool download(std::string url, std::function<void(long long int, long long int)> func) {
         // Create folders if necessary
-        if (!std::filesystem::exists("/switch/NX-Activity-Log/")) {
+        if (!std::filesystem::exists("/switch/PlayLog-Switch/")) {
             std::filesystem::create_directory("/switch");
-            std::filesystem::create_directory("/switch/NX-Activity-Log");
+            std::filesystem::create_directory("/switch/PlayLog-Switch");
         }
 
         bool b = Utils::Curl::downloadToFile(url, TMP_PATH, func);
@@ -80,8 +80,8 @@ namespace Utils::Update {
 
     void install() {
         if (std::filesystem::exists(TMP_DONE_PATH)) {
-            std::filesystem::remove("/switch/NX-Activity-Log/NX-Activity-Log.nro");
-            std::filesystem::rename(TMP_DONE_PATH, "/switch/NX-Activity-Log/NX-Activity-Log.nro");
+            std::filesystem::remove("/switch/PlayLog-Switch/PlayLog-Switch.nro");
+            std::filesystem::rename(TMP_DONE_PATH, "/switch/PlayLog-Switch/PlayLog-Switch.nro");
             if (std::filesystem::exists(AVAILABLE_FILE)) {
                 std::filesystem::remove(AVAILABLE_FILE);
             }

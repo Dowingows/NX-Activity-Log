@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "Application.ImportJob.hpp"
 #include <filesystem>
 #include <fstream>
@@ -16,11 +17,11 @@ namespace Main {
         this->percent = 0;
 
         // Read in import JSON
-        if (!std::filesystem::exists("/switch/NX-Activity-Log/import.json")) {
+        if (!std::filesystem::exists("/switch/PlayLog-Switch/import.json")) {
             this->percent = 100;
             return;
         }
-        std::ifstream importFile("/switch/NX-Activity-Log/import.json");
+        std::ifstream importFile("/switch/PlayLog-Switch/import.json");
         nlohmann::json importJson = nlohmann::json::parse(importFile);
 
         // Create imported JSON
@@ -155,7 +156,7 @@ namespace Main {
         }
 
         // Write imported data to file
-        std::ofstream importedFile("/switch/NX-Activity-Log/importedData.json");
+        std::ofstream importedFile("/switch/PlayLog-Switch/importedData.json");
         importedFile << json.dump(4) << std::endl;
 
         // Pause so those with little data can still see the process completed successfully

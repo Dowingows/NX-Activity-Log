@@ -3,10 +3,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define DEFAULT_NRO "sdmc:/switch/NX-Activity-Log/NX-Activity-Log.nro"
+#define DEFAULT_NRO "sdmc:/switch/PlayLog-Switch/PlayLog-Switch.nro"
 
 const char g_noticeText[] =
-    "nx-hbloader but it loads NX-Activity-Log... thanks to switchbrew for the original :)";
+    "nx-hbloader but it loads PlayLog Switch... thanks to switchbrew for the original :)";
 
 static char g_argv[2048];
 static char g_nextArgv[2048];
@@ -446,7 +446,7 @@ void loadNro(void)
         g_smCloseWorkaround = true;
     }
 
-    extern NORETURN void nroEntrypointTrampoline(u64 entries_ptr, u64 handle, u64 entrypoint);
+    extern void NX_NORETURN nroEntrypointTrampoline(u64 entries_ptr, u64 handle, u64 entrypoint);
     nroEntrypointTrampoline((u64) entries, -1, entrypoint);
 }
 

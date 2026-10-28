@@ -2,7 +2,7 @@
 #include "utils/ThemeUtils.hpp"
 
 // Ini file path
-#define INI_PATH "/config/NX-Activity-Log/theme.ini"
+#define INI_PATH "/config/PlayLog-Switch/theme.ini"
 // Ini var
 static simpleIniParser::Ini * ini = nullptr;
 // Set true when a value has been changed and thus should write to file

@@ -11,7 +11,7 @@ namespace Utils::Update {
     // Query GitHub for latest release
     UpdateData check();
 
-    // Download latest release to /switch/NX-Activity-Log/download.nro
+    // Download latest release to /switch/PlayLog-Switch/download.nro
     // Accepts url to release, callback function for progress and return whether successful
     bool download(std::string, std::function<void(long long int, long long int)>);
 
