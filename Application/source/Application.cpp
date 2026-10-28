@@ -1,6 +1,7 @@
 #include "Application.hpp"
 #include "Application.ExportJob.hpp"
 #include "Application.ImportJob.hpp"
+#include "Application.SendJob.hpp"
 #include "utils/Curl.hpp"
 #include "utils/Lang.hpp"
 #include "utils/UpdateUtils.hpp"
@@ -447,6 +448,11 @@ namespace Main {
     void Application::exportToJSON(std::atomic<double> & percent) {
         // We're gonna use Aether's thread pool even though we're not meant to :P
         Aether::ThreadPool::getInstance()->queueJob(new Application::ExportJob(this, percent), Aether::ThreadPool::Importance::High);
+    }
+
+    void Application::sendToPlayLog(std::atomic<double> & percent, std::string & result) {
+        // This job runs only when the user chooses Send in Settings.
+        Aether::ThreadPool::getInstance()->queueJob(new Application::SendJob(this, percent, result), Aether::ThreadPool::Importance::High);
     }
 
     void Application::run() {
