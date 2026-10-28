@@ -1,5 +1,7 @@
 #include "Application.hpp"
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include "utils/Forwarder.hpp"
 #include "utils/Lang.hpp"
 #include "ui/screen/Settings.hpp"
@@ -238,6 +240,17 @@ namespace Screen {
         this->app->addOverlay(this->progressbox);
     }
 
+    void Settings::showSendDebugOverlay() {
+        std::ifstream file("/switch/NX-Activity-Log/playlog-send-debug.json");
+        std::stringstream contents;
+        if (file.is_open()) contents << file.rdbuf();
+        std::string debug = contents.str();
+        const size_t displayLimit = 6000;
+        bool truncated = debug.size() > displayLimit;
+        if (truncated) debug = debug.substr(0, displayLimit) + "\n... debug reduzido na tela. Arquivo completo no SD: /switch/NX-Activity-Log/playlog-send-debug.json";
+        this->setupGenericMessageOverlay(this->sendResult + "\n\nConteúdo enviado e respostas:\n" + debug);
+    }
+
     void Settings::showDeleteImportedOverlay() {
         // Create msgbox
         this->prepareMessageBox();
@@ -292,6 +305,12 @@ namespace Screen {
                 this->optionDeleteImport->setTouchable(hasData);
 
                 this->setupGenericMessageOverlay("settings.importExport.importSuccessful"_lang);
+
+            } else if (this->job == Job::Send) {
+                this->optionSend->setSelectable(true);
+                this->optionSend->setTouchable(true);
+                this->optionSend->setTextColour(this->app->theme()->text());
+                this->showSendDebugOverlay();
             }
 
             this->job = Job::None;
@@ -513,6 +532,38 @@ namespace Screen {
         lb->setTextColour(this->app->theme()->text());
         this->list->addElement(lb);
         lc = new Aether::ListComment("settings.importExport.importHint"_lang);
+        lc->setTextColour(this->app->theme()->mutedText());
+        this->list->addElement(lc);
+
+        this->list->addElement(new Aether::ListSeparator());
+        lh = new Aether::ListHeading("PlayLog (envio manual)");
+        lh->setRectColour(this->app->theme()->mutedLine());
+        lh->setTextColour(this->app->theme()->text());
+        this->list->addElement(lh);
+        this->list->addElement(new Aether::ListSeparator(20));
+
+        lc = new Aether::ListComment("Destino: " + this->app->config()->playlogUrl() + "\nO envio só acontece ao selecionar o botão abaixo. Nenhum monitoramento em segundo plano.");
+        lc->setTextColour(this->app->theme()->mutedText());
+        this->list->addElement(lc);
+
+        this->optionSend = new Aether::ListButton("Enviar sessões concluídas ao PlayLog", [this]() {
+            this->optionSend->setSelectable(false);
+            this->optionSend->setTouchable(false);
+            this->optionSend->setTextColour(this->app->theme()->mutedText());
+            this->sendResult.clear();
+            this->progressValue = 0;
+            this->progressbox->setHeading("Enviando sessões ao PlayLog");
+            this->progressbox->setValue(0);
+            this->progressbox->reuse();
+            this->app->addOverlay(this->progressbox);
+            this->app->sendToPlayLog(this->progressValue, this->sendResult);
+            this->job = Job::Send;
+        });
+        this->optionSend->setLineColour(this->app->theme()->mutedLine());
+        this->optionSend->setTextColour(this->app->theme()->text());
+        this->list->addElement(this->optionSend);
+
+        lc = new Aether::ListComment("Envia uma sessão por requisição. O payload exato e a resposta ficam no debug exibido após o envio e em /switch/NX-Activity-Log/playlog-send-debug.json. URL configurável em /config/NX-Activity-Log/config.ini, seção [playlog], opção base_url.");
         lc->setTextColour(this->app->theme()->mutedText());
         this->list->addElement(lc);
 
