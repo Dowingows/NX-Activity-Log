@@ -116,6 +116,10 @@ namespace Main {
             this->tImage_ = false;
         }
 
+        sec = ini->findOrCreateSection("playlog");
+        option = sec->findOrCreateFirstOption("base_url", "https://playlog.domlu.house");
+        this->playlogUrl_ = option->value;
+
         // Read in hidden titles
         if (!std::filesystem::exists("/config/NX-Activity-Log/hidden.conf")) {
             std::ofstream file("/config/NX-Activity-Log/hidden.conf");
@@ -253,6 +257,9 @@ namespace Main {
             option->value = "false";
         }
 
+        option = ini->findSection("playlog")->findFirstOption("base_url");
+        option->value = this->playlogUrl_;
+
         ini->writeToFile("/config/NX-Activity-Log/config.ini");
     }
 
@@ -294,6 +301,10 @@ namespace Main {
 
     bool Config::tImage() {
         return this->tImage_;
+    }
+
+    std::string Config::playlogUrl() {
+        return this->playlogUrl_;
     }
 
     bool Config::setAdjustmentValues(const std::vector<AdjustmentValue> & values) {
@@ -357,6 +368,11 @@ namespace Main {
 
     void Config::setTImage(bool b) {
         this->tImage_ = b;
+        this->writeConfig();
+    }
+
+    void Config::setPlaylogUrl(const std::string & url) {
+        this->playlogUrl_ = url;
         this->writeConfig();
     }
 };
