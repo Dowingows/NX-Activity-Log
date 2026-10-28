@@ -32,6 +32,7 @@ namespace Main {
             SortType lSort_;
             ViewPeriod lView_;
             bool tImage_;
+            std::string playlogUrl_;
 
         public:
             // Sets ini to nullptr
@@ -55,6 +56,7 @@ namespace Main {
             SortType lSort();
             ViewPeriod lView();
             bool tImage();
+            std::string playlogUrl();
 
             bool setAdjustmentValues(const std::vector<AdjustmentValue> &);
             bool setHiddenTitles(const std::vector<uint64_t> &);
@@ -66,6 +68,7 @@ namespace Main {
             void setLSort(SortType);
             void setLView(ViewPeriod);
             void setTImage(bool);
+            void setPlaylogUrl(const std::string &);
     };
 };
 
