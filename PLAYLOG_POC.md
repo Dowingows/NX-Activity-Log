@@ -1,6 +1,6 @@
 # PlayLog manual send POC
 
-This fork adds a manual Nintendo Switch history send to PlayLog. It does not poll, monitor, or send anything in the background. The user must open NX Activity Log and choose **Enviar sessões concluídas ao PlayLog** in Settings each time.
+This fork adds a manual Nintendo Switch history send to PlayLog. It does not monitor or send game history in the background. The user must open NX Activity Log and choose **Enviar sessões concluídas ao PlayLog** in Settings each time.
 
 ## What is sent
 
