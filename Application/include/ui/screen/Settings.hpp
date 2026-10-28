@@ -17,6 +17,7 @@ namespace Screen {
                 Import,
                 Export,
                 Send,
+                ConnectionTest,
                 None
             };
 
@@ -51,6 +52,7 @@ namespace Screen {
 
             Aether::ListButton * optionDeleteImport;
             Aether::ListButton * optionSend;
+            Aether::ListButton * optionConnectionTest;
 
             // MessageBox for forwarder/setting info
             Aether::MessageBox * msgbox;
@@ -60,7 +62,7 @@ namespace Screen {
             // MessageBox containing progress bar
             CustomOvl::ProgressBox * progressbox;
             std::atomic<double> progressValue;
-            std::string sendResult;
+            std::string jobResult;
 
             void installForwarder();
 
@@ -78,7 +80,7 @@ namespace Screen {
             void showExportOverlay();
             void showImportOverlay();
             void showDeleteImportedOverlay();
-            void showSendDebugOverlay();
+            void showPlayLogResultOverlay();
 
         public:
             // Passed main application object

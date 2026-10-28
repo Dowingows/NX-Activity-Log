@@ -7,7 +7,7 @@
 
 namespace Main {
     namespace {
-        const char * DEBUG_PATH = "/switch/NX-Activity-Log/playlog-send-debug.json";
+        const char * DEBUG_PATH = "/switch/PlayLog-Switch/playlog-send-debug.json";
 
         std::string isoUtc(uint64_t timestamp) {
             time_t value = static_cast<time_t>(timestamp);
@@ -18,9 +18,11 @@ namespace Main {
             return buffer;
         }
 
-        void writeDebug(const nlohmann::json & debug) {
+        bool writeDebug(const nlohmann::json & debug) {
             std::ofstream file(DEBUG_PATH, std::ios::out | std::ios::trunc);
-            if (file.is_open()) file << debug.dump(2) << std::endl;
+            if (!file.is_open()) return false;
+            file << debug.dump(2) << std::endl;
+            return file.good();
         }
     }
 
@@ -73,12 +75,13 @@ namespace Main {
         debug["succeeded"] = 0;
         debug["failed"] = 0;
         debug["requests"] = nlohmann::json::array();
-        writeDebug(debug);
+        bool debugSaved = writeDebug(debug);
 
         for (size_t i = 0; i < payloads.size(); i++) {
             long status = 0;
             std::string response;
-            const bool networkOk = Utils::Curl::postJson(url, payloads[i], status, response);
+            std::string transportError;
+            const bool networkOk = Utils::Curl::postJson(url, payloads[i], status, response, transportError);
             const bool success = networkOk && status >= 200 && status < 300;
 
             nlohmann::json entry;
@@ -88,16 +91,18 @@ namespace Main {
             entry["transport_ok"] = networkOk;
             entry["success"] = success;
             entry["response"] = response;
+            entry["transport_error"] = transportError;
             debug["requests"].push_back(entry);
             debug["attempted"] = i + 1;
             debug[success ? "succeeded" : "failed"] = debug[success ? "succeeded" : "failed"].get<size_t>() + 1;
-            writeDebug(debug);
+            debugSaved = writeDebug(debug);
             this->percent = 99.0 * (static_cast<double>(i + 1) / totalSessions);
         }
 
-        this->result = "Sucesso: " + std::to_string(debug["succeeded"].get<size_t>()) +
-            "; falhas: " + std::to_string(debug["failed"].get<size_t>()) +
-            "; total: " + std::to_string(totalSessions) + ". Debug completo: " + DEBUG_PATH;
+        this->result = "Envio concluído: " + std::to_string(debug["succeeded"].get<size_t>()) +
+            " enviadas, " + std::to_string(debug["failed"].get<size_t>()) +
+            " falhas, total " + std::to_string(totalSessions) + ".\n" +
+            (debugSaved ? "Log salvo em: " : "Não foi possível salvar o log em: ") + DEBUG_PATH;
         this->percent = 99.9;
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
         this->percent = 100;

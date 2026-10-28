@@ -7,7 +7,7 @@
 // Timeout for connecting
 #define TIMEOUT 3000L
 // User Agent string
-#define USER_AGENT "NX-Activity-Log"
+#define USER_AGENT "PlayLog-Switch"
 
 namespace Utils::Curl {
     void init() {
@@ -94,10 +94,12 @@ namespace Utils::Curl {
         return "";
     }
 
-    bool postJson(const std::string & url, const std::string & body, long & status, std::string & response) {
+    bool postJson(const std::string & url, const std::string & body, long & status, std::string & response, std::string & transportError) {
         std::ostringstream ss;
         CURL * c = curl_easy_init();
         if (c == nullptr) return false;
+
+        char errorBuffer[CURL_ERROR_SIZE] = {0};
 
         struct curl_slist * headers = nullptr;
         headers = curl_slist_append(headers, "Content-Type: application/json");
@@ -114,11 +116,42 @@ namespace Utils::Curl {
         curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1L);
         curl_easy_setopt(c, CURLOPT_SSL_VERIFYPEER, 1L);
         curl_easy_setopt(c, CURLOPT_SSL_VERIFYHOST, 2L);
+        curl_easy_setopt(c, CURLOPT_ERRORBUFFER, errorBuffer);
 
         CURLcode result = curl_easy_perform(c);
         curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &status);
         response = ss.str();
+        if (result != CURLE_OK) transportError = errorBuffer[0] == '\0' ? curl_easy_strerror(result) : errorBuffer;
         curl_slist_free_all(headers);
+        curl_easy_cleanup(c);
+        return result == CURLE_OK;
+    }
+
+    bool getJson(const std::string & url, long & status, std::string & response, std::string & transportError) {
+        std::ostringstream ss;
+        CURL * c = curl_easy_init();
+        if (c == nullptr) {
+            transportError = "curl_easy_init failed";
+            return false;
+        }
+
+        char errorBuffer[CURL_ERROR_SIZE] = {0};
+        curl_easy_setopt(c, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(c, CURLOPT_CONNECTTIMEOUT_MS, 5000L);
+        curl_easy_setopt(c, CURLOPT_TIMEOUT_MS, 10000L);
+        curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1L);
+        curl_easy_setopt(c, CURLOPT_SSL_VERIFYPEER, 1L);
+        curl_easy_setopt(c, CURLOPT_SSL_VERIFYHOST, 2L);
+        curl_easy_setopt(c, CURLOPT_USERAGENT, USER_AGENT);
+        curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, writeData);
+        curl_easy_setopt(c, CURLOPT_WRITEDATA, &ss);
+        curl_easy_setopt(c, CURLOPT_ERRORBUFFER, errorBuffer);
+
+        CURLcode result = curl_easy_perform(c);
+        curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &status);
+        response = ss.str();
+        if (result != CURLE_OK) transportError = errorBuffer[0] == '\0' ? curl_easy_strerror(result) : errorBuffer;
         curl_easy_cleanup(c);
         return result == CURLE_OK;
     }

@@ -1,6 +1,6 @@
 # PlayLog manual send POC
 
-This fork adds a manual Nintendo Switch history send to PlayLog. It does not monitor or send game history in the background. The user must open NX Activity Log and choose **Enviar sessões concluídas ao PlayLog** in Settings each time.
+PlayLog Switch adds a manual Nintendo Switch history send to PlayLog. It does not monitor or send game history in the background. The user must open the app and choose **Enviar sessões concluídas ao PlayLog** in Settings each time.
 
 ## What is sent
 
@@ -18,21 +18,21 @@ Open/incomplete sessions are skipped. Re-sending the history is safe: PlayLog up
 
 ## Endpoint configuration
 
-The default is `https://playlog.domlu.house`. On the SD card, edit `/config/NX-Activity-Log/config.ini` and set:
+The default is `https://playlog.domlu.house`. On the SD card, edit `/config/PlayLog-Switch/config.ini` and set:
 
 ```ini
 [playlog]
 base_url=https://playlog.domlu.house
 ```
 
-Use only the base URL; the app adds `/api/sync/sessions`. Restart NX Activity Log after changing the value. The PlayLog API currently accepts these sync requests without authentication, so the endpoint should remain private to the intended network while that API policy is in place.
+Use only the base URL; the app adds `/api/sync/sessions`. Restart PlayLog Switch after changing the value. The PlayLog API currently accepts these sync requests without authentication, so the endpoint should remain private to the intended network while that API policy is in place.
 
-## Payload and response debug
+## Connection check and payload/response log
 
-After a manual send finishes, the app displays a summary and the request payloads with each HTTP status and response body. The full log is also written to `/switch/NX-Activity-Log/playlog-send-debug.json` on the SD card. This file contains game titles and play history; remove it after debugging if you do not want to keep the copy.
+Settings includes **Checar conexão com PlayLog**, which requests `GET /api/health` and saves its result to `/switch/PlayLog-Switch/playlog-connection-debug.json` on the SD card. After sending, the app shows only a short summary; request payloads, HTTP statuses, response bodies, and transport errors are written to `/switch/PlayLog-Switch/playlog-send-debug.json`. These files contain game titles and play history; remove them after debugging if you do not want to keep the copies.
 
 Requests use HTTPS certificate verification. A network/TLS failure is recorded as a failed transport with its payload retained in the debug file.
 
 ## Build status
 
-Build with the project Makefile from the repository root on a devkitPro environment with the Switch toolchain and submodules initialized. The current Mac checkout did not have `DEVKITPRO` or the Switch compiler available, and the submodule working directories were empty, so this POC has not yet been compiled to an `.nro` or exercised on the console.
+Build with `make` from the repository root on a devkitPro environment. The `.nro` is copied to `sdcard/switch/PlayLog-Switch/PlayLog-Switch.nro`.

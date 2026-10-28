@@ -81,7 +81,7 @@ namespace Utils::Forwarder {
     }
 
     bool prepared() {
-        return std::filesystem::exists("/switch/NX-Activity-Log/NX-Activity-Log.nro");
+        return std::filesystem::exists("/switch/PlayLog-Switch/PlayLog-Switch.nro");
     }
 
     bool atmosphere() {

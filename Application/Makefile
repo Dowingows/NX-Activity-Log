@@ -16,6 +16,7 @@ endif
 # Include switch build toolchain file
 #----------------------------------------------------------------------------------------------------------------------
 include $(DEVKITPRO)/libnx/switch_rules
+export PKG_CONFIG_PATH := $(PORTLIBS)/lib/pkgconfig:$(PKG_CONFIG_PATH)
 #----------------------------------------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------
@@ -29,27 +30,27 @@ include $(DEVKITPRO)/libnx/switch_rules
 # LIBDIRS: Directories of libraries
 # FORWARDER: Path to forwarder which must be present in order to compile
 #---------------------------------------------------------------------------------
-TARGET		:=	NX-Activity-Log
+TARGET		:=	PlayLog-Switch
 BUILD		:=	build
 INCLUDES	:=	include
 SOURCES		:=	source
 ROMFS		:=	romfs
-LIBS		:=	-lAether -lcurl -lnx `sdl2-config --libs` -lSDL2_ttf `freetype-config --libs` -lSDL2_gfx -lSDL2_image -lpng -ljpeg -lwebp -lSimpleIniParser
+LIBS		:=	-lAether -lcurl -lnx `sdl2-config --libs` -lSDL2_ttf `pkg-config freetype2 --libs` -lSDL2_gfx -lSDL2_image -lpng -ljpeg -lwebp -lSimpleIniParser -lz
 LIBDIRS		:=	$(PORTLIBS) $(LIBNX) $(CURDIR)/libs/Aether $(CURDIR)/libs/json $(CURDIR)/libs/SimpleIniParser
 FORWARDER	:=	$(ROMFS)/exefs.nsp
 
 #---------------------------------------------------------------------------------
 # Application version
 #---------------------------------------------------------------------------------
-VER_MAJOR	:= 1
-VER_MINOR	:= 4
+VER_MAJOR	:= 0
+VER_MINOR	:= 1
 VER_MICRO	:= 0
 
 #---------------------------------------------------------------------------------
 # Options for .nacp information
 #---------------------------------------------------------------------------------
-APP_TITLE   := 	NX Activity Log
-APP_AUTHOR	:= 	tallbl0nde
+APP_TITLE   := 	PlayLog Switch
+APP_AUTHOR	:= 	Domingos
 APP_VERSION	:=	$(VER_MAJOR).$(VER_MINOR).$(VER_MICRO)
 ICON 		:= 	icon.jpg
 
@@ -71,7 +72,7 @@ OUTPUT		:=	$(CURDIR)/$(TARGET)
 # Flags to pass to compiler
 #---------------------------------------------------------------------------------
 DEFINES		:=	-D__SWITCH__ -DVER_MAJOR=$(VER_MAJOR) -DVER_MINOR=$(VER_MINOR) -DVER_MICRO=$(VER_MICRO) -DVER_STRING=\"$(VER_MAJOR).$(VER_MINOR).$(VER_MICRO)\"
-CFLAGS		:=	-g -Wall -O2 -ffunction-sections $(ARCH) $(DEFINES) $(INCLUDE) `freetype-config --cflags` `sdl2-config --cflags`
+CFLAGS		:=	-g -Wall -O2 -ffunction-sections $(ARCH) $(DEFINES) $(INCLUDE) `pkg-config freetype2 --cflags` `sdl2-config --cflags`
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++2a
 
 #----------------------------------------------------------------------------------------------------------------------

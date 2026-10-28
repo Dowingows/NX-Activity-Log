@@ -16,7 +16,8 @@ namespace Utils::Curl {
     std::string downloadToString(std::string);
 
     // POST JSON using verified HTTPS. Returns false for network/TLS errors.
-    bool postJson(const std::string &, const std::string &, long &, std::string &);
+    bool postJson(const std::string &, const std::string &, long &, std::string &, std::string &);
+    bool getJson(const std::string &, long &, std::string &, std::string &);
 };
 
 #endif

@@ -37,6 +37,7 @@ namespace Main {
             class ExportJob;
             class ImportJob;
             class SendJob;
+            class ConnectionJob;
 
             // Main aether object used for rendering
             Aether::Window * window;
@@ -179,6 +180,7 @@ namespace Main {
             void exportToJSON(std::atomic<double> & percent);
             // Sends historic sessions to PlayLog only after an explicit user action.
             void sendToPlayLog(std::atomic<double> & percent, std::string & result);
+            void checkPlayLogConnection(std::atomic<double> & percent, std::string & result);
 
             // Handles window loop
             void run();

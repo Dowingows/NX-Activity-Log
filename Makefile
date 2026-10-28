@@ -15,8 +15,8 @@ FORWARDER_SRC	=	$(CURDIR)/Forwarder/exefs.nsp
 
 # Compile everything and copy compiled files
 all: application
-	@mkdir -p $(CURDIR)/sdcard/switch/NX-Activity-Log
-	@cp $(CURDIR)/Application/NX-Activity-Log.nro $(CURDIR)/sdcard/switch/NX-Activity-Log/
+	@mkdir -p $(CURDIR)/sdcard/switch/PlayLog-Switch
+	@cp $(CURDIR)/Application/PlayLog-Switch.nro $(CURDIR)/sdcard/switch/PlayLog-Switch/
 	@echo -e '${COLOUR_BOLD}>> Done! Copy the contents of ./sdcard to your SD Card!${COLOUR_DEFAULT}'
 
 # Compile the application (which depends on the forwarder)

@@ -186,23 +186,23 @@ namespace NX {
                     PlayEvent * event;
 
                     // Populate PlayEvent based on event type
-                    switch (pEvents[i].playEventType) {
+                    switch (pEvents[i].play_event_type) {
                         case PdmPlayEventType_Account:
                             // Ignore this event if type is 2
-                            if (pEvents[i].eventData.account.type == 2) {
+                            if (pEvents[i].event_data.account.type == 2) {
                                 continue;
                             }
                             event = new PlayEvent;
                             event->type = PlayEvent_Account;
 
                             // UserID words are wrong way around (why Nintendo?)
-                            event->userID.uid[0] = pEvents[i].eventData.account.uid[0];
-                            event->userID.uid[0] = (event->userID.uid[0] << 32) | pEvents[i].eventData.account.uid[1];
-                            event->userID.uid[1] = (event->userID.uid[1] << 32) | pEvents[i].eventData.account.uid[2];
-                            event->userID.uid[1] = (event->userID.uid[1] << 32) | pEvents[i].eventData.account.uid[3];
+                            event->userID.uid[0] = pEvents[i].event_data.account.uid[0];
+                            event->userID.uid[0] = (event->userID.uid[0] << 32) | pEvents[i].event_data.account.uid[1];
+                            event->userID.uid[1] = (event->userID.uid[1] << 32) | pEvents[i].event_data.account.uid[2];
+                            event->userID.uid[1] = (event->userID.uid[1] << 32) | pEvents[i].event_data.account.uid[3];
 
                             // Set account event type
-                            switch (pEvents[i].eventData.account.type) {
+                            switch (pEvents[i].event_data.account.type) {
                                 case 0:
                                     event->eventType = Account_Active;
                                     break;
@@ -214,18 +214,18 @@ namespace NX {
 
                         case PdmPlayEventType_Applet:
                             // Ignore this event based on log policy
-                            if (pEvents[i].eventData.applet.logPolicy != PdmPlayLogPolicy_All) {
+                            if (pEvents[i].event_data.applet.log_policy != PdmPlayLogPolicy_All) {
                                 continue;
                             }
                             event = new PlayEvent;
                             event->type = PlayEvent_Applet;
 
                             // Join two halves of title ID
-                            event->titleID = pEvents[i].eventData.applet.program_id[0];
-                            event->titleID = (event->titleID << 32) | pEvents[i].eventData.applet.program_id[1];
+                            event->titleID = pEvents[i].event_data.applet.program_id[0];
+                            event->titleID = (event->titleID << 32) | pEvents[i].event_data.applet.program_id[1];
 
                             // Set applet event type
-                            switch (pEvents[i].eventData.applet.eventType) {
+                            switch (pEvents[i].event_data.applet.event_type) {
                                 case PdmAppletEventType_Launch:
                                     event->eventType = Applet_Launch;
                                     break;
@@ -251,8 +251,8 @@ namespace NX {
                     }
 
                     // Set timestamps
-                    event->clockTimestamp = pEvents[i].timestampUser;
-                    event->steadyTimestamp = pEvents[i].timestampSteady;
+                    event->clockTimestamp = pEvents[i].timestamp_user;
+                    event->steadyTimestamp = pEvents[i].timestamp_steady;
 
                     // Add PlayEvent to vector
                     ret.first.push_back(event);
@@ -270,12 +270,12 @@ namespace NX {
         PlayEventsAndSummaries ret;
 
         // Abort if no file
-        if (!std::filesystem::exists("/switch/NX-Activity-Log/importedData.json")) {
+        if (!std::filesystem::exists("/switch/PlayLog-Switch/importedData.json")) {
             return ret;
         }
 
         // Read in file
-        std::ifstream file("/switch/NX-Activity-Log/importedData.json");
+        std::ifstream file("/switch/PlayLog-Switch/importedData.json");
         nlohmann::json json = nlohmann::json::parse(file);
         if (json["users"] == nullptr || json["importTimestamp"] == nullptr) {
             return ret;
@@ -488,10 +488,10 @@ namespace NX {
         PdmPlayStatistics tmp;
         pdmqryQueryPlayStatisticsByApplicationIdAndUserAccountId(titleID, userID, false, &tmp);
         PlayStatistics * stats = new PlayStatistics;
-        stats->firstPlayed = tmp.first_timestampUser;
-        stats->lastPlayed = tmp.last_timestampUser;
-        stats->playtime = tmp.playtimeMinutes * 60;
-        stats->launches = tmp.totalLaunches;
+        stats->firstPlayed = tmp.first_timestamp_user;
+        stats->lastPlayed = tmp.last_timestamp_user;
+        stats->playtime = tmp.playtime / 1000000000;
+        stats->launches = tmp.total_launches;
         return stats;
     }
 

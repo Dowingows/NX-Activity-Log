@@ -2,6 +2,7 @@
 #include "Application.ExportJob.hpp"
 #include "Application.ImportJob.hpp"
 #include "Application.SendJob.hpp"
+#include "Application.ConnectionJob.hpp"
 #include "utils/Curl.hpp"
 #include "utils/Lang.hpp"
 #include "utils/UpdateUtils.hpp"
@@ -18,7 +19,7 @@
 #include "ui/screen/UserSelect.hpp"
 
 // Path to background image
-#define BACKGROUND_IMAGE "/config/NX-Activity-Log/background.png"
+#define BACKGROUND_IMAGE "/config/PlayLog-Switch/background.png"
 
 namespace Main {
     Application::Application() {
@@ -84,7 +85,7 @@ namespace Main {
         this->titleIdx = 0;
 
         // Create Aether instance (ignore log messages for now)
-        this->window = new Aether::Window("NX-Activity-Log", 1280, 720, [](const std::string message, const bool important) {
+        this->window = new Aether::Window("PlayLog Switch", 1280, 720, [](const std::string message, const bool important) {
 
         });
         // this->window->showDebugInfo(true);
@@ -113,11 +114,9 @@ namespace Main {
     }
 
     void Application::checkForUpdate() {
-        if (Utils::Update::needsCheck()) {
-            Utils::Update::check();
-        }
-
-        this->hasUpdate_ = Utils::Update::available();
+        // This derivative has no release channel yet. Do not query or install
+        // releases from the upstream NX Activity Log project.
+        this->hasUpdate_ = false;
     }
 
     void Application::reinitScreens(ScreenCreate c) {
@@ -453,6 +452,10 @@ namespace Main {
     void Application::sendToPlayLog(std::atomic<double> & percent, std::string & result) {
         // This job runs only when the user chooses Send in Settings.
         Aether::ThreadPool::getInstance()->queueJob(new Application::SendJob(this, percent, result), Aether::ThreadPool::Importance::High);
+    }
+
+    void Application::checkPlayLogConnection(std::atomic<double> & percent, std::string & result) {
+        Aether::ThreadPool::getInstance()->queueJob(new Application::ConnectionJob(this, percent, result), Aether::ThreadPool::Importance::High);
     }
 
     void Application::run() {

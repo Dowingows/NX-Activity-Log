@@ -1,8 +1,8 @@
-# NX Activity Log
+# PlayLog Switch
 
-**NX Activity Log** is a homebrew application for the Nintendo Switch which displays more precise information about your play activity.
+**PlayLog Switch** is a Nintendo Switch homebrew application based on NX Activity Log. It lets you review play activity and manually send completed sessions to your PlayLog server.
 
-[Download](https://github.com/tallbl0nde/NX-Activity-Log/releases)
+This is a separate app build for PlayLog; it does not update or replace the upstream NX Activity Log app.
 
 Curious about what's next? See my to-do list on [Trello](https://trello.com/b/HaJ1THGq/nx-activity-log)
 
@@ -43,13 +43,13 @@ This application currently has the following features:
   * Custom Themes
     * All colours used in the app can be adjusted
     * Set a custom background image
-      * **Requires a PNG saved at /config/NX-Activity-Log/background.png**
+      * **Requires a PNG saved at /config/PlayLog-Switch/background.png**
 * Update in-app
   * Checks for updates automatically and displays an icon if one is available
   * Update completely within the app
 * User Page Replacement
   * Requires LayeredFS and either Atmosphere 0.10.0+, ReiNX or SXOS (or build and copy the forwarder to your CFW-specific titles folder)
-  * **Requires .nro to be at /switch/NX-Activity-Log/NX-Activity-Log.nro**
+  * **Requires .nro to be at /switch/PlayLog-Switch/PlayLog-Switch.nro**
 
 _Note: The data shown in Recent Activity and Details may be slightly inaccurate over larger periods of time (ie. off by a few minutes) but I will try to improve this over time. If activity is not being shown for earlier periods of time it is likely your switch has been reset at some point, which wipes the data used to calculate playtime in this way._
 
