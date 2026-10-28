@@ -93,4 +93,33 @@ namespace Utils::Curl {
         }
         return "";
     }
+
+    bool postJson(const std::string & url, const std::string & body, long & status, std::string & response) {
+        std::ostringstream ss;
+        CURL * c = curl_easy_init();
+        if (c == nullptr) return false;
+
+        struct curl_slist * headers = nullptr;
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+        headers = curl_slist_append(headers, "Accept: application/json");
+        curl_easy_setopt(c, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(c, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(c, CURLOPT_POST, 1L);
+        curl_easy_setopt(c, CURLOPT_POSTFIELDS, body.c_str());
+        curl_easy_setopt(c, CURLOPT_POSTFIELDSIZE, static_cast<long>(body.size()));
+        curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, writeData);
+        curl_easy_setopt(c, CURLOPT_WRITEDATA, &ss);
+        curl_easy_setopt(c, CURLOPT_CONNECTTIMEOUT_MS, 5000L);
+        curl_easy_setopt(c, CURLOPT_TIMEOUT_MS, 20000L);
+        curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1L);
+        curl_easy_setopt(c, CURLOPT_SSL_VERIFYPEER, 1L);
+        curl_easy_setopt(c, CURLOPT_SSL_VERIFYHOST, 2L);
+
+        CURLcode result = curl_easy_perform(c);
+        curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &status);
+        response = ss.str();
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(c);
+        return result == CURLE_OK;
+    }
 };
