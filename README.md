@@ -35,6 +35,7 @@ This application currently has the following features:
     * Number of launches
     * Viewing each 'Play Session'
   * Event-by-event breakdown of your activity
+* Manual PlayLog sync POC for completed sessions. It sends only when selected by the user; no background monitoring. See [PLAYLOG_POC.md](PLAYLOG_POC.md).
 * Multi-language Support
   * English, Chinese (Simplified and Traditional), French, German, Italian, Korean, Portugese, Russian, Spanish and Turkish
 * Theme Support
