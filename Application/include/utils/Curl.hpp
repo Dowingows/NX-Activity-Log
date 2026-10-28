@@ -14,6 +14,9 @@ namespace Utils::Curl {
 
     // Return response from URL as string (empty on error)
     std::string downloadToString(std::string);
+
+    // POST JSON using verified HTTPS. Returns false for network/TLS errors.
+    bool postJson(const std::string &, const std::string &, long &, std::string &);
 };
 
 #endif
