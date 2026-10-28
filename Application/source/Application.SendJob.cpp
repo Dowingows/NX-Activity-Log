@@ -33,9 +33,7 @@ namespace Main {
         this->percent = 0;
         const std::string endpoint = this->app->config()->playlogUrl();
         const std::string url = endpoint + (endpoint.empty() || endpoint.back() == '/' ? "" : "/") + "api/sync/sessions";
-        nlohmann::json requests = nlohmann::json::array();
         std::vector<std::string> payloads;
-        size_t totalSessions = 0;
 
         // Build a stable, repeatable request body for each completed session.
         for (NX::User * user : this->app->users) {
@@ -68,13 +66,13 @@ namespace Main {
             }
         }
 
-        totalSessions = payloads.size();
+        const size_t totalSessions = payloads.size();
         nlohmann::json debug;
         debug["endpoint"] = url;
         debug["attempted"] = 0;
         debug["succeeded"] = 0;
         debug["failed"] = 0;
-        debug["requests"] = requests;
+        debug["requests"] = nlohmann::json::array();
         writeDebug(debug);
 
         for (size_t i = 0; i < payloads.size(); i++) {
@@ -94,7 +92,7 @@ namespace Main {
             debug["attempted"] = i + 1;
             debug[success ? "succeeded" : "failed"] = debug[success ? "succeeded" : "failed"].get<size_t>() + 1;
             writeDebug(debug);
-            this->percent = totalSessions == 0 ? 99.0 : 99.0 * (static_cast<double>(i + 1) / totalSessions);
+            this->percent = 99.0 * (static_cast<double>(i + 1) / totalSessions);
         }
 
         this->result = "Sucesso: " + std::to_string(debug["succeeded"].get<size_t>()) +
