@@ -542,7 +542,7 @@ namespace Screen {
         this->list->addElement(lh);
         this->list->addElement(new Aether::ListSeparator(20));
 
-        lc = new Aether::ListComment("Destino: " + this->app->config()->playlogUrl() + "\nO envio só acontece ao selecionar o botão abaixo. Nenhum monitoramento em segundo plano.");
+        lc = new Aether::ListComment("Destino: " + this->app->config()->playlogUrl() + "\nO histórico só é enviado quando você seleciona o botão abaixo.");
         lc->setTextColour(this->app->theme()->mutedText());
         this->list->addElement(lc);
 
